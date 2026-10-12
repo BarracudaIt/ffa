@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneo Tutti Contro Tutti 🎲</title>
+    <style>
+        :root {
+            --bg-color: #1e1e2e;
+            --card-bg: #313244;
+            --text-color: #cdd6f4;
+            --accent-purple: #cba6f7;
+            --accent-green: #a6e3a1;
+            --accent-red: #f38ba8;
+            --accent-yellow: #f9e2af;
+            --accent-blue: #89b4fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-purple);
+            margin: 0 0 5px 0;
+            font-size: 2rem;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--accent-purple);
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Leaderboard Banner */
+        .leaderboard-card {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-score-box {
+            text-align: center;
+        }
+
+        .player-name {
+            font-size: 0.95rem;
+            color: #a6adc8;
+            font-weight: bold;
+        }
+
+        .player-score {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+        }
+
+        /* Sezione Dado */
+        .dice-section {
+            text-align: center;
+        }
+
+        .dice-icon {
+            font-size: 4rem;
+            margin: 5px 0;
+            user-select: none;
+        }
+
+        .result-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-green);
+            min-height: 1.5em;
+        }
+
+        .url-text {
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            word-break: break-all;
+            margin-top: 5px;
+        }
+
+        /* Pulsanti Controllo */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-roll { background-color: var(--accent-blue); color: #11111b; }
+        .btn-next { background-color: #45475a; color: var(--text-color); }
+        .btn-reset { background-color: var(--accent-yellow); color: #11111b; }
+
+        /* Tabella Giochi */
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #45475a;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-color);
+            border-radius: 6px 6px 0 0;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #11111b;
+        }
+
+        .games-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .games-list li {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+
+        .unplayed-item {
+            color: var(--accent-green);
+        }
+
+        .played-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .played-title {
+            font-weight: bold;
+            color: var(--accent-purple);
+        }
+
+        .score-inputs-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .score-input-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-input-group label {
+            font-size: 0.85rem;
+            color: #a6adc8;
+        }
+
+        .score-input-group input {
+            width: 50px;
+            background: #1e1e2e;
+            border: 1px solid #45475a;
+            color: var(--text-color);
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Modal Overlay per YouTube */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--accent-purple);
+        }
+
+        .close-btn {
+            background: var(--accent-red);
+            color: #11111b;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* Rapporto 16:9 */
+            height: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Fine Torneo Banner */
+        .end-tournament-card {
+            background: linear-gradient(135deg, #45475a, #313244);
+            border: 2px solid var(--accent-yellow);
+            text-align: center;
+            display: none;
+        }
+
+        .end-tournament-card h2 {
+            color: var(--accent-yellow);
+            font-size: 1.5rem;
+        }
+
+        .podium-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0 0 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .podium-list li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>✨ TORNEO TUTTI CONTRO TUTTI ✨</h1>
+    <h2>🎲 Barry vs Riot vs Panda 🎲</h2>
+
+    <!-- Leaderboard Totale -->
+    <div class="card leaderboard-card">
+        <div class="player-score-box">
+            <div class="player-name">Barry</div>
+            <div class="player-score" id="totalScoreBarry">0</div>
+        </div>
+        <div class="player-score-box">
+            <div class="player-name">Riot</div>
+            <div class="player-score" id="totalScoreRiot">0</div>
+        </div>
+        <div class="player-score-box">
+            <div class="player-name">Panda</div>
+            <div class="player-score" id="totalScorePanda">0</div>
+        </div>
+    </div>
+
+    <!-- Sezione Dado -->
+    <div class="card dice-section">
+        <div class="dice-icon" id="diceIcon">🎲</div>
+        <div class="result-text" id="resultText">Premi 'Lancia Dado' per iniziare il torneo</div>
+        <div class="url-text" id="urlText"></div>
+    </div>
+
+    <!-- Pulsanti Controllo -->
+    <div class="btn-group">
+        <button class="btn-roll" id="rollBtn" onclick="startRoll()">🎲 Lancia Dado</button>
+        <button class="btn-next" id="nextBtn" onclick="startRoll()">⏭ Gioco Successivo</button>
+        <button class="btn-reset" onclick="resetGames()">🔄 Reset Torneo</button>
+    </div>
+
+    <!-- Card Fine Torneo -->
+    <div class="card end-tournament-card" id="endCard">
+        <h2>🎉 TORNEO COMPLETATO! 🎉</h2>
+        <ul class="podium-list" id="podiumList"></ul>
+    </div>
+
+    <!-- Tabella Giochi -->
+    <div class="card">
+        <div class="tab-buttons">
+            <button class="tab-btn active" id="tabUnplayedBtn" onclick="switchTab('unplayed')">Non Fatti (0)</button>
+            <button class="tab-btn" id="tabPlayedBtn" onclick="switchTab('played')">Fatti (0)</button>
+        </div>
+        <ul class="games-list unplayed" id="unplayedList"></ul>
+        <ul class="games-list played" id="playedList" style="display: none;"></ul>
+    </div>
+</div>
+
+<!-- Modal Popup per Video YouTube -->
+<div class="modal-overlay" id="videoModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🎬 Inizio Torneo!</h3>
+            <button class="close-btn" onclick="closeVideoModal()">Chiudi ✖</button>
+        </div>
+        <div class="video-container">
+            <iframe id="ytPlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inserisci qui l'ID del video di YouTube che desideri riprodurre
+    const YOUTUBE_VIDEO_ID = "5eUJHFDwEWQ";
+
+    // Lista giochi di base
+    const GIOCHI_BASE = [
+        { nome: "Geoguesser", url: "https://www.geoguessr.com/it/daily-challenges" },
+        
+    ];
+
+    let giochiNonFatti = [...GIOCHI_BASE];
+    let giochiFatti = [];
+    let isRolling = false;
+    let tournamentStarted = false;
+    let newTabRef = null;
+
+    function init() {
+        updateGamesList();
+        updateLeaderboard();
+    }
+
+    function checkVideoOnStart() {
+        if (!tournamentStarted) {
+            tournamentStarted = true;
+            openVideoModal();
+        }
+    }
+
+    function openVideoModal() {
+        const modal = document.getElementById('videoModal');
+        const player = document.getElementById('ytPlayer');
+        player.src = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1`;
+        modal.style.display = 'flex';
+    }
+
+    function closeVideoModal() {
+        const modal = document.getElementById('videoModal');
+        const player = document.getElementById('ytPlayer');
+        player.src = ''; 
+        modal.style.display = 'none';
+    }
+
+    function updateScore(index, player, value) {
+        const val = parseFloat(value) || 0;
+        giochiFatti[index].scores[player] = val;
+        updateLeaderboard();
+    }
+
+    function updateLeaderboard() {
+        let barryTotal = 0;
+        let riotTotal = 0;
+        let pandaTotal = 0;
+
+        giochiFatti.forEach(g => {
+            barryTotal += g.scores.barry || 0;
+            riotTotal += g.scores.riot || 0;
+            pandaTotal += g.scores.panda || 0;
+        });
+
+        document.getElementById('totalScoreBarry').textContent = barryTotal;
+        document.getElementById('totalScoreRiot').textContent = riotTotal;
+        document.getElementById('totalScorePanda').textContent = pandaTotal;
+
+        checkTournamentEnd(barryTotal, riotTotal, pandaTotal);
+    }
+
+    function checkTournamentEnd(barryTotal, riotTotal, pandaTotal) {
+        if (giochiNonFatti.length === 0 && GIOCHI_BASE.length > 0) {
+            const playersScores = [
+                { name: "Barry", score: barryTotal },
+                { name: "Riot", score: riotTotal },
+                { name: "Panda", score: pandaTotal }
+            ];
+
+            playersScores.sort((a, b) => b.score - a.score);
+
+            const endCard = document.getElementById('endCard');
+            const podiumList = document.getElementById('podiumList');
+
+            const medals = ["🥇", "🥈", "🥉"];
+            podiumList.innerHTML = playersScores.map((p, i) => `
+                <li>${medals[i]} ${p.name}: ${p.score} pt</li>
+            `).join('');
+
+            endCard.style.display = 'block';
+        }
+    }
+
+    function startRoll() {
+        if (isRolling) return;
+
+        if (giochiNonFatti.length === 0) {
+            document.getElementById('resultText').textContent = "Tutti i giochi sono stati fatti! Torneo completato.";
+            document.getElementById('resultText').style.color = "var(--accent-yellow)";
+            return;
+        }
+
+        // 1. SOLUZIONE PER FIREFOX: Apri subito una scheda vuota dal click dell'utente
+        newTabRef = window.open('about:blank', '_blank');
+
+        // 2. Mostra il video popout se è la prima volta
+        checkVideoOnStart();
+
+        isRolling = true;
+        document.getElementById('rollBtn').disabled = true;
+        document.getElementById('nextBtn').disabled = true;
+
+        const diceFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+        let steps = 0;
+        const maxSteps = 12;
+
+        function animate() {
+            const randomFace = diceFaces[Math.floor(Math.random() * diceFaces.length)];
+            const tempGame = GIOCHI_BASE[Math.floor(Math.random() * GIOCHI_BASE.length)];
+
+            document.getElementById('diceIcon').textContent = randomFace;
+            document.getElementById('resultText').style.color = "var(--accent-green)";
+            document.getElementById('resultText').textContent = `Estrazione... ${tempGame.nome}`;
+
+            steps++;
+            if (steps < maxSteps) {
+                setTimeout(animate, 70 + (steps * 12));
+            } else {
+                finalizeRoll();
+            }
+        }
+
+        animate();
+    }
+
+    function finalizeRoll() {
+        const selectedIndex = Math.floor(Math.random() * giochiNonFatti.length);
+        const selectedGame = giochiNonFatti[selectedIndex];
+
+        giochiNonFatti.splice(selectedIndex, 1);
+        giochiFatti.push({
+            ...selectedGame,
+            scores: { barry: 0, riot: 0, panda: 0 }
+        });
+
+        document.getElementById('diceIcon').textContent = "🎲";
+        document.getElementById('resultText').textContent = `Estratto: ${selectedGame.nome}`;
+        document.getElementById('urlText').textContent = selectedGame.url;
+
+        // 3. Reindirizza la scheda aperta in precedenza
+        if (newTabRef) {
+            newTabRef.location.href = selectedGame.url;
+        }
+
+        updateGamesList();
+        updateLeaderboard();
+
+        isRolling = false;
+        document.getElementById('rollBtn').disabled = false;
+        document.getElementById('nextBtn').disabled = false;
+    }
+
+    function updateGamesList() {
+        const unplayedUl = document.getElementById('unplayedList');
+        const playedUl = document.getElementById('playedList');
+
+        unplayedUl.innerHTML = giochiNonFatti.map(g => `<li class="unplayed-item">• ${g.nome}</li>`).join('');
+
+        playedUl.innerHTML = giochiFatti.map((g, index) => `
+            <li class="played-item">
+                <span class="played-title">${g.nome}</span>
+                <div class="score-inputs-row">
+                    <div class="score-input-group">
+                        <label>Barry:</label>
+                        <input type="number" value="${g.scores.barry}" onchange="updateScore(${index}, 'barry', this.value)" oninput="updateScore(${index}, 'barry', this.value)">
+                    </div>
+                    <div class="score-input-group">
+                        <label>Riot:</label>
+                        <input type="number" value="${g.scores.riot}" onchange="updateScore(${index}, 'riot', this.value)" oninput="updateScore(${index}, 'riot', this.value)">
+                    </div>
+                    <div class="score-input-group">
+                        <label>Panda:</label>
+                        <input type="number" value="${g.scores.panda}" onchange="updateScore(${index}, 'panda', this.value)" oninput="updateScore(${index}, 'panda', this.value)">
+                    </div>
+                </div>
+            </li>
+        `).join('');
+
+        document.getElementById('tabUnplayedBtn').textContent = `Non Fatti (${giochiNonFatti.length})`;
+        document.getElementById('tabPlayedBtn').textContent = `Fatti (${giochiFatti.length})`;
+    }
+
+    function resetGames() {
+        giochiNonFatti = [...GIOCHI_BASE];
+        giochiFatti = [];
+        tournamentStarted = false;
+        document.getElementById('endCard').style.display = 'none';
+
+        closeVideoModal();
+
+        updateGamesList();
+        updateLeaderboard();
+
+        document.getElementById('resultText').style.color = "var(--accent-green)";
+        document.getElementById('resultText').textContent = "Torneo resettato! Premi 'Lancia Dado' per iniziare.";
+        document.getElementById('urlText').textContent = "";
+    }
+
+    function switchTab(tab) {
+        const unplayedUl = document.getElementById('unplayedList');
+        const playedUl = document.getElementById('playedList');
+        const unplayedBtn = document.getElementById('tabUnplayedBtn');
+        const playedBtn = document.getElementById('tabPlayedBtn');
+
+        if (tab === 'unplayed') {
+            unplayedUl.style.display = 'block';
+            playedUl.style.display = 'none';
+            unplayedBtn.classList.add('active');
+            playedBtn.classList.remove('active');
+        } else {
+            unplayedUl.style.display = 'none';
+            playedUl.style.display = 'block';
+            playedBtn.classList.add('active');
+            unplayedBtn.classList.remove('active');
+        }
+    }
+
+    init();
+</script>
+
+</body>
+</html>
